@@ -13,3 +13,10 @@ with open("simulacao_lidar.csv", "w", newline="") as csvfile:
         writer.writerow([tempo_ms, distancia])
         print(f"{tempo_ms};{distancia}")
         time.sleep(0.5)  # espera 500ms igual ao Arduino
+
+        for _ in range(5): # Simula 5 leituras de "buraco"
+            tempo_ms = int((time.time() - tempo_inicial) * 1000)
+            distancia = random.randint(150, 400)
+            writer.writerow([tempo_ms, distancia])
+            print(f"{tempo_ms};{distancia}")
+            time.sleep(0.5)
