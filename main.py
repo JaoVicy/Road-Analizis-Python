@@ -1,9 +1,7 @@
-# 1. Importando as bibliotecas
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.ensemble import IsolationForest
-# 2. Lendo o arquivo CSV gerado pelo simulador
+
 df = pd.read_csv('simulacao_lidar.csv', delimiter=';')
 
 # 3. Visualizando as primeiras linhas
@@ -12,56 +10,25 @@ print(df.head())
 # 4. Estatísticas básicas
 print(df.describe())
 
-# 5. Plotando a distância ao longo do tempo
-plt.figure(figsize=(12, 6))
-sns.lineplot(x='Tempo(ms)', y='Distancia(mm)', data=df, marker='o')
-plt.title('Distância medida ao longo do tempo')
-plt.xlabel('Tempo (ms)')
-plt.ylabel('Distância (mm)')
-plt.grid(True)
-plt.show()
-
-# 6. Plotando um histograma das distâncias
-plt.figure(figsize=(8, 5))
-sns.histplot(data=df, x='Distancia(mm)', bins=20, kde=True)
-plt.title('Distribuição das Distâncias Medidas')
-plt.xlabel('Distância (mm)')
-plt.ylabel('Frequência')
-plt.show()
-
-# 7. Encontrando quedas bruscas ("buracos") - diferença entre leituras
 df['Delta'] = df['Distancia(mm)'].diff()
 buracos = df[df['Delta'] < -150]  # Ajuste o threshold conforme necessário
 
-print("Possíveis buracos encontrados:")
-print(buracos[['Tempo(ms)', 'Distancia(mm)', 'Delta']])
+# Seleciona os pontos com Distancia(mm) >= 100
+acima_100 = df[df['Distancia(mm)'] >= 100]
+igual_100 = df[(df['Distancia(mm)'] <= 100) & (df['Distancia(mm)'] >= 80)]
 
-# 8. Visualizando os buracos no gráfico
 plt.figure(figsize=(12, 6))
 sns.lineplot(x='Tempo(ms)', y='Distancia(mm)', data=df, marker='o', label='Trajetória')
-plt.scatter(buracos['Tempo(ms)'], buracos['Distancia(mm)'], color='red', label='Possíveis buracos', zorder=5)
-plt.axhline(y=100.3, color='red', linestyle='--', label='Chão liso (65 mm)')
+
+# Plota todos os pontos >= 100 em vermelho
+plt.scatter(acima_100['Tempo(ms)'], acima_100['Distancia(mm)'], color='red', label='Buracos', zorder=6)
+plt.scatter(igual_100['Tempo(ms)'], igual_100['Distancia(mm)'], color='blue', label='Possíveis Buracos', zorder=7)
+
+plt.axhline(y=100.0, color='red', linestyle='--', label='Referêncial para buracos (100 mm)')
+plt.axhline(y=80, color='green', linestyle='--', label='Referencial para possiveis buracos (80 mm)')
 plt.title('Detecção de buracos na trajetória')
 plt.xlabel('Tempo (ms)')
 plt.ylabel('Distância (mm)')
-plt.legend()
-plt.grid(True)
-plt.show()
-
-# 9. (Opcional) Detecção automática de anomalias com Scikit-Learn
-modelo = IsolationForest(contamination=0.05)
-df['outlier'] = modelo.fit_predict(df[['Distancia(mm)']])
-buracos_ml = df[df['outlier'] == -1]
-print("Buracos detectados com Machine Learning:")
-print(buracos_ml[['Tempo(ms)', 'Distancia(mm)']])
-
-# 10. Visualizando buracos detectados por ML
-plt.figure(figsize=(12, 6))
-sns.lineplot(x='Tempo(ms)', y='Distancia(mm)', data=df, marker='o', label='Trajetória')
-plt.axhline(y=100.0, color='red', linestyle='--', linewidth=2, label='Referência: 100 mm')
-plt.title('Distância medida ao longo do tempo')
-plt.xlabel('Tempo (ms)')
-plt.ylabel('Distância (mm)')
-plt.legend()
+plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 plt.grid(True)
 plt.show()
