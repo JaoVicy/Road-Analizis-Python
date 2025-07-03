@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-df = pd.read_csv('simulacao_lidar.csv', delimiter=';')
+df = pd.read_csv('data_road.csv', delimiter=';')
 
 # 3. Visualizando as primeiras linhas
 print(df.head())
